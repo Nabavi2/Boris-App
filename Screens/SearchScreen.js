@@ -42,9 +42,12 @@ export default SearchScreen = (props) => {
       return;
     }
     setLoading(true);
-
-    await axios
-      .get(`http://www.boredapi.com/api/activity?${text}=${item}`)
+    const inputText = await axios
+      .get(
+        `http://www.boredapi.com/api/activity?${
+          text.toLowerCase
+        }=${item.toLowerCase()}`
+      )
       .then((Response) => {
         if (Response.data.error) {
           setError(Response.data.error);
