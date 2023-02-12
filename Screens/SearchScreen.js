@@ -29,7 +29,7 @@ export default SearchScreen = (props) => {
   const [isClick, setIsClick] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
-  const [text, setText] = useState("");
+  const [text, setText] = useState("activity");
   const [formVisible, setFormVisible] = useState(false);
   const [addLike, setAddLike] = useState(false);
   const [disLike, setDisLike] = useState(true);
