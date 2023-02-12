@@ -15,6 +15,9 @@ import axios from "axios";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Entypo from "react-native-vector-icons/Entypo";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Menu, RadioButton } from "react-native-paper";
 
@@ -28,6 +31,9 @@ export default SearchScreen = (props) => {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [text, setText] = useState("");
   const [formVisible, setFormVisible] = useState(false);
+  const [addLike, setAddLike] = useState(false);
+  const [disLike, setDisLike] = useState(true);
+  const [addedLikedItems, setAddedLikedImtes] = useState([]);
 
   const [filterList, setFilterList] = useState([
     { name: "Activity", isSelected: true, text: "activity" },
@@ -40,6 +46,8 @@ export default SearchScreen = (props) => {
     /* Search function handler */
   }
   const searchHandler = async (item) => {
+    setAddLike(false);
+    setDisLike(true);
     if (!searchItem) {
       return;
     }
@@ -72,7 +80,14 @@ export default SearchScreen = (props) => {
     });
     setFilterList(newArray);
   };
-
+  const onHandleLike = () => {
+    addedLikedItems.push(data);
+    let addedLikedItem = { addedLikedItems: addedLikedItems };
+    AsyncStorage.setItem("addedLikedItems", JSON.stringify(addedLikedItem));
+  };
+  const onHandleDisLike = () => {
+    setData();
+  };
   if (loading) {
     return (
       <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
@@ -183,7 +198,7 @@ export default SearchScreen = (props) => {
       ) : null}
 
       {data ? (
-        <View style={{ paddingHorizontal: 27, marginTop: 10 }}>
+        <View style={styles.cart}>
           <Text>{data.accessibility}</Text>
           <Text>{data.activity}</Text>
           <Text>{data.key}</Text>
@@ -191,6 +206,55 @@ export default SearchScreen = (props) => {
           <Text>{data.participants}</Text>
           <Text>{data.price}</Text>
           <Text>{data.type}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignSelf: "center",
+              alignItems: "center",
+              width: "90%",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                marginTop: 10,
+              }}
+            >
+              <SimpleLineIcons
+                name="like"
+                size={24}
+                color={addLike ? "black" : "white"}
+                onPress={() => {
+                  setAddLike(!addLike);
+                  setDisLike(true);
+                  onHandleLike();
+                }}
+                style={{ marginRight: 20 }}
+              />
+
+              <SimpleLineIcons
+                name="dislike"
+                size={24}
+                color={disLike ? "white" : "black"}
+                onPress={() => {
+                  setAddLike(false);
+                  setDisLike(!disLike);
+                  onHandleDisLike();
+                }}
+              />
+            </View>
+            <View>
+              <Text style={{ fontWeight: "bold" }}>Main List</Text>
+              <FontAwesome5
+                name="arrow-right"
+                size={24}
+                color="black"
+                style={{ alignSelf: "flex-end" }}
+                onPress={() => props.navigation.navigate("ActivityMainList")}
+              />
+            </View>
+          </View>
         </View>
       ) : (
         <Text
@@ -255,5 +319,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#fc8d30",
     marginVertical: 15,
+  },
+  cart: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    marginTop: 10,
+    backgroundColor: "#b4b8b5",
+    elevation: 0.5,
+    width: "95%",
+    borderRadius: 10,
+    alignSelf: "center",
   },
 });
