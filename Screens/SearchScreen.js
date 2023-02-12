@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import Entypo from "react-native-vector-icons/Entypo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Menu, RadioButton } from "react-native-paper";
 
@@ -26,6 +27,7 @@ export default SearchScreen = (props) => {
   const [searchHistory, setSearchHistory] = useState([]);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [text, setText] = useState("");
+  const [formVisible, setFormVisible] = useState(false);
 
   const [filterList, setFilterList] = useState([
     { name: "Activity", isSelected: true, text: "activity" },
@@ -43,11 +45,7 @@ export default SearchScreen = (props) => {
     }
     setLoading(true);
     const inputText = await axios
-      .get(
-        `http://www.boredapi.com/api/activity?${
-          text.toLowerCase
-        }=${item.toLowerCase()}`
-      )
+      .get(`http://www.boredapi.com/api/activity?${text}=${item.toLowerCase()}`)
       .then((Response) => {
         if (Response.data.error) {
           setError(Response.data.error);
@@ -85,86 +83,99 @@ export default SearchScreen = (props) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignSelf: "center",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={styles.inputContainer}>
-          <TextInput
-            onChangeText={(text) => setSearchItem(text)}
-            value={searchItem}
-            placeholder={`Add ${text}`}
-            style={styles.searchInput}
-          />
+      {formVisible ? (
+        <View
+          style={{
+            flexDirection: "row",
+            alignSelf: "center",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={styles.inputContainer}>
+            <TextInput
+              onChangeText={(text) => setSearchItem(text)}
+              value={searchItem}
+              placeholder={`Add ${text}`}
+              style={styles.searchInput}
+            />
+            <MaterialIcons
+              name="search"
+              size={28}
+              color="black"
+              onPress={() => {
+                setIsClick(true);
+                searchHandler(searchItem);
+              }}
+            />
+          </View>
+          {/* History button */}
           <MaterialIcons
-            name="search"
+            name="history"
             size={28}
             color="black"
             onPress={() => {
-              setIsClick(true);
-              searchHandler(searchItem);
+              props.navigation.navigate("HistoryScreen");
             }}
+            style={styles.historyBtn}
           />
+          {/* Filter Container */}
+          <View style={styles.filterBtnContainer}>
+            <Menu
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+              visible={showFilterMenu}
+              contentStyle={{ backgroundColor: "white", paddingRight: 20 }}
+              onDismiss={() => setShowFilterMenu(false)}
+              anchor={
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setShowFilterMenu(true)}
+                >
+                  <MaterialCommunityIcons
+                    name="filter"
+                    size={28}
+                    color="#fc8d30"
+                  />
+                </TouchableOpacity>
+              }
+            >
+              <View>
+                {filterList.map((item, index) => (
+                  <>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <RadioButton.Android
+                        color="#fc8d30"
+                        status={item.isSelected ? "checked" : "unchecked"}
+                        onPress={() => {
+                          setSearchItem("");
+                          setIsClick(false);
+                          onFilterHandleChange(index, item.text);
+                        }}
+                      />
+                      <Text>{item.name}</Text>
+                    </View>
+                  </>
+                ))}
+              </View>
+            </Menu>
+          </View>
         </View>
-        {/* History button */}
-        <MaterialIcons
-          name="history"
-          size={28}
-          color="black"
-          onPress={() => {
-            props.navigation.navigate("HistoryScreen");
-          }}
-          style={styles.historyBtn}
-        />
-        {/* Filter Container */}
-        <View style={styles.filterBtnContainer}>
-          <Menu
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-            visible={showFilterMenu}
-            contentStyle={{ backgroundColor: "white", paddingRight: 20 }}
-            onDismiss={() => setShowFilterMenu(false)}
-            anchor={
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setShowFilterMenu(true)}
-              >
-                <MaterialCommunityIcons
-                  name="filter"
-                  size={28}
-                  color="#cca152"
-                />
-              </TouchableOpacity>
-            }
-          >
-            <View>
-              {filterList.map((item, index) => (
-                <>
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <RadioButton.Android
-                      color="#cca152"
-                      status={item.isSelected ? "checked" : "unchecked"}
-                      onPress={() => {
-                        setSearchItem("");
-                        setIsClick(false);
-                        onFilterHandleChange(index, item.text);
-                      }}
-                    />
-                    <Text>{item.name}</Text>
-                  </View>
-                </>
-              ))}
-            </View>
-          </Menu>
-        </View>
-      </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.addBtn}
+          onPress={() => setFormVisible(true)}
+        >
+          <Text style={{ color: "white", fontWeight: "700" }}>Add</Text>
+          <Entypo name="plus" size={24} color="white" />
+        </TouchableOpacity>
+      )}
+
       {!searchItem && isClick ? (
         <Text style={{ marginLeft: 20, color: "red" }}>
           Please fill the form and try again
@@ -233,5 +244,16 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     justifyContent: "center",
     alignItems: "center",
+  },
+  addBtn: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    width: "70%",
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "#fc8d30",
+    marginVertical: 15,
   },
 });
