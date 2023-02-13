@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, SafeAreaView, FlatList } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Header from "../Components/Header";
 
 export default function ArchiveListScreen(props) {
   const [archiveList, setArchiveList] = useState();
@@ -29,14 +30,8 @@ export default function ArchiveListScreen(props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <AntDesign
-        name="arrowleft"
-        size={24}
-        color="black"
-        style={styles.backArrow}
-        onPress={() => props.navigation.pop()}
-      />
-      <Text style={styles.title}>Archive List</Text>
+      <Header title="Archive List" navigation={props.navigation} />
+
       <FlatList
         contentContainerStyle={{ paddingBottom: 20 }}
         data={archiveList}
@@ -52,16 +47,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flex: 1,
   },
-  backArrow: {
-    marginTop: 10,
-    marginLeft: 5,
-  },
-  title: {
-    marginLeft: 10,
-    marginTop: 10,
-    fontWeight: "bold",
-    fontSize: 18,
-  },
+
   separator: {
     width: "90%",
     height: 1,

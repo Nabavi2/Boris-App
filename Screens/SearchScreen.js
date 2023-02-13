@@ -15,9 +15,9 @@ import axios from "axios";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Entypo from "react-native-vector-icons/Entypo";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import Foundation from "react-native-vector-icons/Foundation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Menu, RadioButton } from "react-native-paper";
 
@@ -33,7 +33,7 @@ export default SearchScreen = (props) => {
   const [formVisible, setFormVisible] = useState(false);
   const [addLike, setAddLike] = useState(false);
   const [disLike, setDisLike] = useState(true);
-  const [addedLikedItems, setAddedLikedImtes] = useState([]);
+  const [addedLikedItems, setAddedLikedItems] = useState([]);
 
   const [filterList, setFilterList] = useState([
     { name: "Activity", isSelected: true, text: "activity" },
@@ -99,86 +99,106 @@ export default SearchScreen = (props) => {
   return (
     <SafeAreaView style={styles.container}>
       {formVisible ? (
-        <View
-          style={{
-            flexDirection: "row",
-            alignSelf: "center",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={styles.inputContainer}>
-            <TextInput
-              onChangeText={(text) => setSearchItem(text)}
-              value={searchItem}
-              placeholder={`Add ${text}`}
-              style={styles.searchInput}
-            />
+        <View>
+          <View
+            style={{
+              flexDirection: "row",
+              alignSelf: "center",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={styles.inputContainer}>
+              <TextInput
+                onChangeText={(text) => setSearchItem(text)}
+                value={searchItem}
+                placeholder={`Add ${text}`}
+                style={styles.searchInput}
+              />
+              <MaterialIcons
+                name="search"
+                size={28}
+                color="black"
+                onPress={() => {
+                  setIsClick(true);
+                  searchHandler(searchItem);
+                }}
+              />
+            </View>
+
+            {/* Filter Container */}
+            <View style={styles.filterBtnContainer}>
+              <Menu
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 10,
+                }}
+                visible={showFilterMenu}
+                contentStyle={{ backgroundColor: "white", paddingRight: 20 }}
+                onDismiss={() => setShowFilterMenu(false)}
+                anchor={
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={() => setShowFilterMenu(true)}
+                  >
+                    <MaterialCommunityIcons
+                      name="filter"
+                      size={28}
+                      color="#fc8d30"
+                    />
+                  </TouchableOpacity>
+                }
+              >
+                <View>
+                  {filterList.map((item, index) => (
+                    <>
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <RadioButton.Android
+                          color="#fc8d30"
+                          status={item.isSelected ? "checked" : "unchecked"}
+                          onPress={() => {
+                            setSearchItem("");
+                            setIsClick(false);
+                            onFilterHandleChange(index, item.text);
+                          }}
+                        />
+                        <Text>{item.name}</Text>
+                      </View>
+                    </>
+                  ))}
+                </View>
+              </Menu>
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              paddingRight: 10,
+              marginTop: 10,
+            }}
+          >
+            {/* History button */}
             <MaterialIcons
-              name="search"
+              name="history"
               size={28}
               color="black"
               onPress={() => {
-                setIsClick(true);
-                searchHandler(searchItem);
+                props.navigation.navigate("HistoryScreen");
               }}
+              style={styles.historyBtn}
             />
-          </View>
-          {/* History button */}
-          <MaterialIcons
-            name="history"
-            size={28}
-            color="black"
-            onPress={() => {
-              props.navigation.navigate("HistoryScreen");
-            }}
-            style={styles.historyBtn}
-          />
-          {/* Filter Container */}
-          <View style={styles.filterBtnContainer}>
-            <Menu
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 10,
-              }}
-              visible={showFilterMenu}
-              contentStyle={{ backgroundColor: "white", paddingRight: 20 }}
-              onDismiss={() => setShowFilterMenu(false)}
-              anchor={
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => setShowFilterMenu(true)}
-                >
-                  <MaterialCommunityIcons
-                    name="filter"
-                    size={28}
-                    color="#fc8d30"
-                  />
-                </TouchableOpacity>
-              }
-            >
-              <View>
-                {filterList.map((item, index) => (
-                  <>
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <RadioButton.Android
-                        color="#fc8d30"
-                        status={item.isSelected ? "checked" : "unchecked"}
-                        onPress={() => {
-                          setSearchItem("");
-                          setIsClick(false);
-                          onFilterHandleChange(index, item.text);
-                        }}
-                      />
-                      <Text>{item.name}</Text>
-                    </View>
-                  </>
-                ))}
-              </View>
-            </Menu>
+            {/* Archive button */}
+            <Foundation
+              name="archive"
+              size={24}
+              color="black"
+              onPress={() => props.navigation.navigate("ArchiveListScreen")}
+            />
           </View>
         </View>
       ) : (
@@ -251,7 +271,10 @@ export default SearchScreen = (props) => {
                 size={24}
                 color="black"
                 style={{ alignSelf: "flex-end" }}
-                onPress={() => props.navigation.navigate("ActivityMainList")}
+                onPress={() => {
+                  props.navigation.navigate("ActivityMainList");
+                  // setAddedLikedItems([]);
+                }}
               />
             </View>
           </View>
@@ -275,7 +298,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   inputContainer: {
-    width: "75%",
+    width: "85%",
     height: 37,
     borderRadius: 8,
     borderColor: "grey",
@@ -296,16 +319,14 @@ const styles = StyleSheet.create({
   },
   historyBtn: {
     width: "8%",
-    marginLeft: 10,
-    marginRight: -10,
-    marginTop: 10,
+    marginHorizontal: 15,
   },
   filterBtnContainer: {
     width: "15%",
     height: 37,
     borderRadius: 8,
     marginTop: 10,
-    marginLeft: 6,
+    // marginLeft: 6,
     justifyContent: "center",
     alignItems: "center",
   },

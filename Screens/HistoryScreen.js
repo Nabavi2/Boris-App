@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, SafeAreaView, FlatList } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Header from "../Components/Header";
 
 export default function HistoryScreen(props) {
   const [historyList, setHistoryList] = useState();
@@ -29,16 +30,7 @@ export default function HistoryScreen(props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <AntDesign
-        name="arrowleft"
-        size={24}
-        color="black"
-        style={styles.backArrow}
-        onPress={() => props.navigation.pop()}
-      />
-      <Text style={{ marginLeft: 10, marginTop: 10, fontWeight: "bold" }}>
-        Searched History
-      </Text>
+      <Header title="Searched History" navigation={props.navigation} />
       <FlatList
         contentContainerStyle={{ paddingBottom: 20 }}
         data={historyList}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Text,
   View,
@@ -7,34 +7,60 @@ import {
   FlatList,
   TouchableOpacity,
   Share,
+  TextInput,
 } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { Menu, RadioButton } from "react-native-paper";
 
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import Header from "../Components/Header";
 
 export default function ActivityMainList(props) {
   const [favoriteList, setFavoriteList] = useState([]);
   const [archiveList, setArchiveList] = useState([]);
+  const [secondFavoriteList, setSeconFavoriteList] = useState();
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [isClick, setIsClick] = useState(false);
+  const [text, setText] = useState("activity");
+  const [searchItem, setSearchItem] = useState("");
 
-  const getFavoriteList = async () => {
+  const [filterList, setFilterList] = useState([
+    { name: "Activity", isSelected: true, text: "activity" },
+    { name: "Accessibility", isSelected: false, text: "accessibility" },
+    { name: "Participants", isSelected: false, text: "participants" },
+    { name: "Type", isSelected: false, text: "type" },
+    { name: "Price", isSelected: false, text: "price" },
+  ]);
+  {
+    /* Get Liked Activity list Handler */
+  }
+  const getLikedList = async () => {
     const list = await AsyncStorage.getItem("addedLikedItems");
     setFavoriteList(JSON.parse(list).addedLikedItems);
   };
-  useEffect(() => {
-    getFavoriteList();
+  useMemo(() => {
+    getLikedList();
   }, []);
-
+  {
+    /* Finished task handler*/
+  }
   const onHandleFinishedActivity = (index, data) => {
     const secondFavoriteList = favoriteList.filter((item, ind) => {
-      archiveList.push(item);
+      if (ind == index) {
+        archiveList.push(item);
+        AsyncStorage.removeItem("addedLikedItems");
+      }
+
       let archivelist = { archiveList: archiveList };
       AsyncStorage.setItem("archiveList", JSON.stringify(archivelist));
       return ind != index;
     });
-    console.log("ARCHIVE LIST", archiveList);
     setFavoriteList(secondFavoriteList);
   };
+
   const onShare = async (data) => {
     try {
       const sharedActivity = JSON.stringify(data);
@@ -43,10 +69,17 @@ export default function ActivityMainList(props) {
           "This my activity for today that I want to share with you " +
           sharedActivity,
       });
-      console.log("DATATATATATshare", JSON.stringify(data));
     } catch (error) {
       alert(error.message);
     }
+  };
+  const onFilterHandleChange = (ind, text) => {
+    let newArray = filterList.map((item, index) => {
+      index == ind ? (item.isSelected = true) : (item.isSelected = false);
+      setText(text);
+      return { ...item };
+    });
+    setFilterList(newArray);
   };
   const Item = ({ data, index }) => {
     return (
@@ -88,14 +121,78 @@ export default function ActivityMainList(props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <AntDesign
-        name="arrowleft"
-        size={24}
-        color="black"
-        style={styles.backArrow}
-        onPress={() => props.navigation.pop()}
-      />
-      <Text style={styles.title}>Main List</Text>
+      <Header title="Main List" navigation={props.navigation} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignSelf: "center",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <View style={styles.inputContainer}>
+          <TextInput
+            onChangeText={(text) => setSearchItem(text)}
+            value={searchItem}
+            placeholder={`Add ${text}`}
+            style={styles.searchInput}
+          />
+          <MaterialIcons
+            name="search"
+            size={28}
+            color="black"
+            onPress={() => {
+              setIsClick(true);
+              searchHandler(searchItem);
+            }}
+          />
+        </View>
+
+        {/* Filter Container */}
+        <View style={styles.filterBtnContainer}>
+          <Menu
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+            visible={showFilterMenu}
+            contentStyle={{ backgroundColor: "white", paddingRight: 20 }}
+            onDismiss={() => setShowFilterMenu(false)}
+            anchor={
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setShowFilterMenu(true)}
+              >
+                <MaterialCommunityIcons
+                  name="filter"
+                  size={28}
+                  color="#fc8d30"
+                />
+              </TouchableOpacity>
+            }
+          >
+            <View>
+              {filterList.map((item, index) => (
+                <>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <RadioButton.Android
+                      color="#fc8d30"
+                      status={item.isSelected ? "checked" : "unchecked"}
+                      onPress={() => {
+                        setSearchItem("");
+                        setIsClick(false);
+                        onFilterHandleChange(index, item.text);
+                      }}
+                    />
+                    <Text>{item.name}</Text>
+                  </View>
+                </>
+              ))}
+            </View>
+          </Menu>
+        </View>
+      </View>
       <FlatList
         contentContainerStyle={{ paddingBottom: 20 }}
         data={favoriteList}
@@ -111,15 +208,33 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flex: 1,
   },
-  backArrow: {
+  inputContainer: {
+    width: "85%",
+    height: 37,
+    borderRadius: 8,
+    borderColor: "grey",
+    borderWidth: 1,
     marginTop: 10,
-    marginLeft: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingRight: 10,
+    marginLeft: 20,
   },
-  title: {
-    marginLeft: 10,
+  searchInput: {
+    width: "85%",
+    height: 37,
+    borderRadius: 8,
+    borderColor: "grey",
+    paddingHorizontal: 7,
+  },
+  filterBtnContainer: {
+    width: "15%",
+    height: 37,
+    borderRadius: 8,
     marginTop: 10,
-    fontWeight: "bold",
-    fontSize: 18,
+    justifyContent: "center",
+    alignItems: "center",
   },
   separator: {
     width: "90%",

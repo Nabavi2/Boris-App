@@ -5,6 +5,7 @@ import SearchScreen from "../Screens/SearchScreen";
 import HistoryScreen from "../Screens/HistoryScreen";
 import ActivityMainList from "../Screens/ActivityMainList";
 import ArchiveListScreen from "../Screens/ArchiveListScreen";
+import Header from "../Components/Header";
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,7 @@ const AppNavigation = (props) => {
         <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
         <Stack.Screen name="ActivityMainList" component={ActivityMainList} />
         <Stack.Screen name="ArchiveListScreen" component={ArchiveListScreen} />
+        <Stack.Screen name="Header" component={Header} />
       </Stack.Navigator>
     </NavigationContainer>
   );
