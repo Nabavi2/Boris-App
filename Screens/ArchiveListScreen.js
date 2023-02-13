@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, SafeAreaView, FlatList } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import Header from "../Components/Header";
 
 export default function ArchiveListScreen(props) {
@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flex: 1,
   },
-
   separator: {
     width: "90%",
     height: 1,

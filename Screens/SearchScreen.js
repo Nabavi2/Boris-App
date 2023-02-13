@@ -80,14 +80,15 @@ export default SearchScreen = (props) => {
     });
     setFilterList(newArray);
   };
-  const onHandleLike = () => {
+  const onHandleAddedLikedItem = () => {
     addedLikedItems.push(data);
     let addedLikedItem = { addedLikedItems: addedLikedItems };
-    AsyncStorage.setItem("addedLikedItems", JSON.stringify(addedLikedItem));
+    AsyncStorage.mergeItem("addedLikedItems", JSON.stringify(addedLikedItem));
   };
   const onHandleDisLike = () => {
     setData();
   };
+
   if (loading) {
     return (
       <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
@@ -248,7 +249,7 @@ export default SearchScreen = (props) => {
                 onPress={() => {
                   setAddLike(!addLike);
                   setDisLike(true);
-                  onHandleLike();
+                  onHandleAddedLikedItem();
                 }}
                 style={{ marginRight: 20 }}
               />
@@ -273,7 +274,7 @@ export default SearchScreen = (props) => {
                 style={{ alignSelf: "flex-end" }}
                 onPress={() => {
                   props.navigation.navigate("ActivityMainList");
-                  // setAddedLikedItems([]);
+                  setAddedLikedItems([]);
                 }}
               />
             </View>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Text,
   View,
@@ -21,11 +21,11 @@ import Header from "../Components/Header";
 export default function ActivityMainList(props) {
   const [favoriteList, setFavoriteList] = useState([]);
   const [archiveList, setArchiveList] = useState([]);
-  const [secondFavoriteList, setSeconFavoriteList] = useState();
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [isClick, setIsClick] = useState(false);
-  const [text, setText] = useState("activity");
+  const [activityText, setActivityText] = useState("activity");
   const [searchItem, setSearchItem] = useState("");
+  const [newItems, setNewItems] = useState(favoriteList);
 
   const [filterList, setFilterList] = useState([
     { name: "Activity", isSelected: true, text: "activity" },
@@ -37,11 +37,13 @@ export default function ActivityMainList(props) {
   {
     /* Get Liked Activity list Handler */
   }
+  let list;
   const getLikedList = async () => {
-    const list = await AsyncStorage.getItem("addedLikedItems");
+    list = await AsyncStorage.getItem("addedLikedItems");
     setFavoriteList(JSON.parse(list).addedLikedItems);
+    setNewItems(JSON.parse(list).addedLikedItems);
   };
-  useMemo(() => {
+  useEffect(() => {
     getLikedList();
   }, []);
   {
@@ -60,7 +62,9 @@ export default function ActivityMainList(props) {
     });
     setFavoriteList(secondFavoriteList);
   };
-
+  {
+    /* Share task handler*/
+  }
   const onShare = async (data) => {
     try {
       const sharedActivity = JSON.stringify(data);
@@ -73,13 +77,29 @@ export default function ActivityMainList(props) {
       alert(error.message);
     }
   };
+  {
+    /* To Do list tasks handler*/
+  }
   const onFilterHandleChange = (ind, text) => {
     let newArray = filterList.map((item, index) => {
       index == ind ? (item.isSelected = true) : (item.isSelected = false);
-      setText(text);
+      setActivityText(text);
       return { ...item };
     });
     setFilterList(newArray);
+  };
+
+  const onSearchQueryChange = (text) => {
+    console.log("NEW ITEMS", newItems);
+    setSearchItem(text);
+
+    const newActivities = favoriteList.filter((activity) => {
+      return activity[activityText]
+        .toString()
+        .toLowerCase()
+        .includes(text.toString().toLowerCase());
+    });
+    setFavoriteList(text ? newActivities : newItems);
   };
   const Item = ({ data, index }) => {
     return (
@@ -132,9 +152,9 @@ export default function ActivityMainList(props) {
       >
         <View style={styles.inputContainer}>
           <TextInput
-            onChangeText={(text) => setSearchItem(text)}
             value={searchItem}
-            placeholder={`Add ${text}`}
+            placeholder={`Add ${activityText}`}
+            onChangeText={onSearchQueryChange}
             style={styles.searchInput}
           />
           <MaterialIcons
@@ -143,7 +163,7 @@ export default function ActivityMainList(props) {
             color="black"
             onPress={() => {
               setIsClick(true);
-              searchHandler(searchItem);
+              // onSearchQueryChange(searchItem);
             }}
           />
         </View>
@@ -198,7 +218,6 @@ export default function ActivityMainList(props) {
         data={favoriteList}
         renderItem={({ item, index }) => <Item data={item} index={index} />}
         keyExtractor={(item) => item.key}
-        // ItemSeparatorComponent={() => <View style={styles.separator}></View>}
       />
     </SafeAreaView>
   );

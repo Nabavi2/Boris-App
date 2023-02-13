@@ -1,5 +1,6 @@
-import { Text, View, StyleSheet } from "react-native";
 import React from "react";
+import { Text, View, StyleSheet } from "react-native";
+
 import AntDesign from "react-native-vector-icons/AntDesign";
 
 const Header = (props) => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, SafeAreaView, FlatList } from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../Components/Header";
 
